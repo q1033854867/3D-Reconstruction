@@ -6,11 +6,11 @@ This is a MATLAB project of 3D-Reconstruction. By first running the prepross.m a
 *	A0...499.jpg
 *automask
 *centerline
-*...*
+*...
 
 ## Platform
 Tested under Windows 10 and MATLAB R2018b.<br>
-You also can run this project in macOS or Linux. Before you run anything, you should compile all the c source file using `mex filename`. More details in [MATLAB documentation](https://ww2.mathworks.cn/help/matlab/ref/mex.html?lang=en)
+You also can run this project in macOS or Linux. Before you run anything, you should compile all the c source file using `mex filename`. More details in [MATLAB mex documentation](https://ww2.mathworks.cn/help/matlab/ref/mex.html?lang=en)
 
 ## Acknowledgements
 This work was supported by Independent Innovation Project in Wuhan Uni of Tech.
