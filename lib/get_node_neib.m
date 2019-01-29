@@ -1,4 +1,4 @@
-function [nodes_neib] = find_node_neib(nodes_graph_c_r,nodes_graph_c_nz)
+function [nodes_neib] = get_node_neib(nodes_graph_c_r,nodes_graph_c_nz)
 nodes_num = length(nodes_graph_c_r);
 % node_neib = [upper lower left right upperleft loweright null null]
 nodes_neib = zeros(nodes_num,8);

@@ -1,16 +1,17 @@
-function [bw] = automask_mini(points_graph_c,board_ori)
-board = rgb2gray(board_ori);
+function [bw] = automask_mini(nodes,board_path)
+board = imread(board_path);
+board = rgb2gray(board);
 % figure,imshow(board)
 [b_m,b_n] = size(board);
 
-node_size = size(points_graph_c,2);
-points_graph_c_ = points_graph_c(points_graph_c~=0);
-points_graph_c_ = reshape(points_graph_c_,[],node_size);
-[n_m,n_n] = size(points_graph_c_);
-node_ld = points_graph_c_(n_m-1,1+1);
-node_rd = points_graph_c_(n_m-1,n_n-1);
-node_lu = points_graph_c_(1+1,1+1);
-node_ru = points_graph_c_(1+1,n_n-1);
+% node_size = size(nodes.graph_c,2);
+% points_graph_c_ = points_graph_c(points_graph_c~=0);
+% points_graph_c_ = reshape(points_graph_c_,[],nodes.size);
+[n_m,n_n] = size(nodes.graph_c_nz);
+node_ld = nodes.graph_c_nz(n_m-1,1+1);
+node_rd = nodes.graph_c_nz(n_m-1,n_n-1);
+node_lu = nodes.graph_c_nz(1+1,1+1);
+node_ru = nodes.graph_c_nz(1+1,n_n-1);
 
 node_mat = complex2imgmat([node_ld;node_rd;node_ru;node_lu]);
 y = node_mat(:,1)';

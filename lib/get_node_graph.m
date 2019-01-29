@@ -1,4 +1,4 @@
-function [points_graph_c] = node_graph_baseright(points_raw,node_size,board)
+function [points_graph_c] = get_node_graph(points_raw,node_size,board)
 % node number
 num = size(points_raw);
 points_raw = fliplr(points_raw);

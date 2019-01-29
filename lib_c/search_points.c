@@ -27,13 +27,13 @@ void** fspace_2d(int row, int col, int length)
 {
 	int i;
 	void **b;
-	b = (void **)calloc(sizeof(void *), row);
+	b = (void **)mxCalloc(sizeof(void *), row);
 	if (b == NULL) {
 		mexPrintf("error1\n");
 		exit(1);
 	}
 	for (i = 0; i < row; i++) {
-		b[i] = (void *)calloc(length, col);
+		b[i] = (void *)mxCalloc(length, col);
 		if (b[i] == NULL) {
 			mexPrintf("error2\n");
 			exit(1);
@@ -46,10 +46,10 @@ void ffree_2d(void **a, int row)
 {
 	int i;
 	for (i = 0; i < row; i++) {
-		free(a[i]);
+		mxFree(a[i]);
 		a[i] = NULL;
 	}
-	free(a);
+	mxFree(a);
 	a = NULL;
 }
 
@@ -65,12 +65,21 @@ int round_nngt(double input)
 	}
 }
 
-void process(laserline *test, double **img, int M, int N)
+void init_laserline(laserline *test, int M, int N)
 {
-	int *row_mask = (int *)calloc(sizeof(int), M);
+	test->img_round = (double **)fspace_2d(M, N, sizeof(double));
+	test->m = (double *)mxCalloc(sizeof(double), M);
+	test->m_p = test->m;
+	test->n = (double *)mxCalloc(sizeof(double), M);
+	test->n_p = test->n;
+}
+
+void process_basic(laserline *test, double **img, int M, int N)
+{
+	int *row_mask = (int *)mxCalloc(sizeof(int), M);
 	int row_mask_end[] = {M-1, 0};
-	int *row_max_idx = (int *)calloc(sizeof(int), M);
-	double *row_max_val = (double *)calloc(sizeof(double), M);
+	int *row_max_idx = (int *)mxCalloc(sizeof(int), M);
+	double *row_max_val = (double *)mxCalloc(sizeof(double), M);
 	int global_max_idx[2];
 	double global_max_val = 0;
 	for (int i = 0; i < M; i++)
@@ -118,11 +127,12 @@ void process(laserline *test, double **img, int M, int N)
 	double subpxl_i, subpxl_j;
 
 	// laserline test;
-	test->img_round = (double **)fspace_2d(M, N, sizeof(double));
-	test->m = (double *)calloc(sizeof(double), M);
-	test->m_p = test->m;
-	test->n = (double *)calloc(sizeof(double), M);
-	test->n_p = test->n;
+	init_laserline(test, M, N);
+	// test->img_round = (double **)fspace_2d(M, N, sizeof(double));
+	// test->m = (double *)mxCalloc(sizeof(double), M);
+	// test->m_p = test->m;
+	// test->n = (double *)mxCalloc(sizeof(double), M);
+	// test->n_p = test->n;
 
 	// upward
 	for (int i = row_mask_end[1]; i >= row_mask_end[0]; i--)
@@ -161,9 +171,9 @@ void process(laserline *test, double **img, int M, int N)
 		*test->n_p++ = subpxl_j;
 	}
 
-	free(row_mask);
-	free(row_max_idx);
-	free(row_max_val);
+	mxFree(row_mask);
+	mxFree(row_max_idx);
+	mxFree(row_max_val);
 
 	// int points_num;
 	// points_num = test->m_p - test->m;
@@ -179,7 +189,12 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, mxArray* prhs[])
 	input = mxGetPr(prhs[0]);
 	M = mxGetM(prhs[0]);
 	N = mxGetN(prhs[0]);
-	// mexPrintf("M = %d\nN = %d\n", M, N);
+
+	char *buf;
+    size_t buflen;
+    buflen = mxGetN(prhs[1]) + 1;
+    buf = mxMalloc(buflen);
+    mxGetString(prhs[1], buf, (mwSize) buflen);
 
 	// resize to 2d
 	double **input_re = (double **)fspace_2d(M, N, sizeof(double));
@@ -193,9 +208,17 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, mxArray* prhs[])
 
 	// define laserline struct
 	laserline test;
-	laserline *test_p = &test;
-	process(test_p, input_re, M, N);
 
+	if (strcmp(buf, "basic") == 0)
+    {
+		// printf("basic model\n");
+		process_basic(&test, input_re, M, N);
+    }
+	else if (strcmp(buf, "bidirect") == 0)
+	{
+		// printf("advanced model 1\n");
+	}
+	
 
 	double *output_img, *output_m, *output_n;
 	int points_num;
@@ -222,8 +245,8 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, mxArray* prhs[])
 		output_n[i] = test.n[i] + 1;
 	}
 
-	free(test.m);
-	free(test.n);
+	mxFree(test.m);
+	mxFree(test.n);
 	ffree_2d(input_re, M);
 	ffree_2d(test.img_round, M);
 
