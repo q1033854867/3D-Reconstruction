@@ -1,16 +1,16 @@
 function main(varargin)
-% main function
-% Before run this function, 'preprocess.m' should run first 
-% and four .mat file (nodes, mask, rot_axis, filter_s) should 
-% exist in current current directory.
+% Before run this function, you should check four .mat file:
+%   nodes.mat mask.mat rot_axis.mat and filter_s.mat 
+% whether exist in current current directory.
+% If not,you should run 'preprocess' in command line first.  
 clear global
 
-%% set config
+%% configure basic parameters
 % whether write cloudpoints data into txt
 % format(each row): [x_idx y_idx z_idx]
 config.write_into_txt = false;
 % realtime display 3d cloudpoints result
-config.realtime_disp = false;
+config.realtime_disp = true;
 % read all images into memory previous
 config.read_img_prev = true;
 % dynamic adjust size of ROI mask (can speed up)
@@ -34,7 +34,7 @@ b = rot_axis.b;
 bottom = rot_axis.bottom;
 theta_delta = 2*pi/length(config.imgnum);
 
-%% 
+%% follow config to set related parameter
 if config.mask_dynamc_adj == true
     mask.dy_adj = true;
 end
@@ -45,18 +45,14 @@ if config.write_into_txt == true
     fp=fopen([filename,'.txt'],'a');
 end
 
-if config.realtime_disp == true
-    figure
-end
-
 if config.read_img_prev == true
     % estimate memory for feasibility
     mem_img = numel(board)/size(board,3);
     meminfo = memory;
     mem_avi = meminfo.MemAvailableAllArrays;
     mem_need = length(config.imgnum) * mem_img;
-    disp(['Need ',num2str(mem_need/2^30),...
-        'GBytes to read all images in']);
+    disp(['All images will take up ',num2str(mem_need/2^30),...
+        'GBytes of memory space']);
     if mem_need + 2^30 > mem_avi
         error([...
             'Avilable memory is not enough to read all images in.',...
@@ -66,20 +62,30 @@ if config.read_img_prev == true
     % init global big images mat
     global_img_mat('init',size(board,1),size(board,2),...
         length(config.imgnum),'uint8');
+    disp('start reading images...')
+    start_readimg_time = clock;
     % write into global big images mat
     for img_i = 1:length(config.imgnum)
         img_name = fullfile(config.imgfold,[config.imgstr,...
             num2str(config.imgnum(img_i)),'.jpg']);
         global_img_mat('set',img_i,img_name);
     end
+    total_readimg_time = etime(clock,start_readimg_time);
+    disp(['total time:',num2str(total_readimg_time),'s']);
+    disp(['average time:',...
+        num2str(total_readimg_time/length(config.imgnum)),'s']);
 end
 
-%% main loop
-disp('start processing')
+if config.realtime_disp == true
+    figure
+end
+
 if config.timing == true
     time_start = clock;
 end
 
+%% main loop
+disp('start processing...')
 for img_i = 1:length(config.imgnum)
     % count
     if mod(img_i,50) == 0
