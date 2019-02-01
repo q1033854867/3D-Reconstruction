@@ -1,12 +1,8 @@
 function [bw] = automask_mini(nodes,board_path)
 board = imread(board_path);
 board = rgb2gray(board);
-% figure,imshow(board)
 [b_m,b_n] = size(board);
 
-% node_size = size(nodes.graph_c,2);
-% points_graph_c_ = points_graph_c(points_graph_c~=0);
-% points_graph_c_ = reshape(points_graph_c_,[],nodes.size);
 [n_m,n_n] = size(nodes.graph_c_nz);
 node_ld = nodes.graph_c_nz(n_m-1,1+1);
 node_rd = nodes.graph_c_nz(n_m-1,n_n-1);

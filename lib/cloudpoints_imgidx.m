@@ -1,4 +1,4 @@
-function [m,n] = centerline_barycenter(img_name,mask,h1_s,h2_s)
+function [m,n] = cloudpoints_imgidx(img_name,mask,h1_s,h2_s)
 % input arg
 %   img_name: 
 %       img_address (read image for disk in each loop) or 
@@ -11,23 +11,23 @@ function [m,n] = centerline_barycenter(img_name,mask,h1_s,h2_s)
 
 %% choose mode
 if nargin == 1
-    [m,n] = centerline_barycenter_accelerate(img_name);
+    [m,n] = cloudpoints_imgidx_accelerate(img_name);
 elseif nargin == 2
-    [m,n] = centerline_barycenter_default(img_name,mask);
+    [m,n] = cloudpoints_imgidx_default(img_name,mask);
 else
-    [m,n] = centerline_barycenter_default(img_name,mask,h1_s,h2_s);
+    [m,n] = cloudpoints_imgidx_default(img_name,mask,h1_s,h2_s);
 end
 
 end
 
-function [m,n] = centerline_barycenter_accelerate(img_name)
+function [m,n] = cloudpoints_imgidx_accelerate(img_name)
 % input arg
 %   img_name: img_number (real all images in memory previous)
 % output arg
 %   m(n): subpixel result, which size is [points number,row(col) idx]
 
 %% get and crop image
-global mask filter_s
+global mask filter_s config
 
 if isnumeric(img_name)
     img = global_img_mat('get',img_name);
@@ -54,15 +54,26 @@ img_crop = img_crop_f(filter_s.h_center_idx(1):...
     filter_s.h_center_idx(2):filter_s.h_center_idx(2)+size(img_crop,2)-1);
 
 %% search points based on barycenter method
-img_crop(img_crop < 0.1*max(img_crop(:))) = -1;
-[~,m,n] = search_points(img_crop,'basic');
+if config.save_laser == true
+    [tempimg,m,n] = choose_algorithm(img_crop,'bidirect advance 2');
+    % [tempimg,m,n] = choose_algorithm(img_crop,'bidirect advance 2');
+    name_laser = fullfile(config.laser_fold,[num2str(config.count),...
+        '_laser.jpg']);
+    name_inten = fullfile(config.laser_fold,[num2str(config.count),...
+        '_inten.jpg']);
+    imwrite(tempimg,name_laser);
+    imwrite(img_crop,name_inten);
+else
+    [~,m,n] = choose_algorithm(img_crop,'basic');
+end
+
 % coord transform
 m = m + mask.r_min;
 n = n + mask.c_min;
 
 %% adjust size of ROI mask
 if mask.dy_adj
-    mask.r_min = min(m);
+    mask.r_min = round(min(m)) - 20;
     mask.mask_crop = ...
         mask.main_mask(mask.r_min:mask.r_max,mask.c_min:mask.c_max);
     mask.dy_adj = false;
@@ -70,7 +81,52 @@ end
 
 end
 
-function [m,n] = centerline_barycenter_default...
+function [img,m,n] = choose_algorithm(img_crop,algorithm)
+switch algorithm
+    case 'basic'
+        img_crop(img_crop < 0.1*max(img_crop(:))) = -1;
+        [img,m,n] = search_points(img_crop,'basic');
+    case 'bidirect'
+        img_crop(img_crop < 0.1*max(img_crop(:))) = -1;
+        [img,m,n] = search_points(img_crop,'bidirect');
+    case 'bidirect advance 1'
+        img_crop(img_crop < 0.1*max(img_crop(:))) = -1;
+        [img,m,n] = search_points(img_crop,'bidirect advance 1');
+    case 'bidirect advance 2'
+        img_crop(img_crop < 0.1*max(img_crop(:))) = -1;
+        % img_crop(img_crop < 0.1*max(img_crop(:))) = 0;
+        [img,m,n] = search_points(img_crop,'bidirect advance 2');
+    case 'bidirect advance 3'
+        img_crop(img_crop < 0.1*max(img_crop(:))) = -1;
+        [img,m,n] = search_points(img_crop,'bidirect advance 3');
+    case 'multi connected domain'
+        img_crop(img_crop < 0.2*max(img_crop(:))) = 0;
+        [domain_label,domain_num] = bwlabel(img_crop);
+        m = [];n = [];
+        img = zeros(size(img_crop));
+        for domain_i = 1:domain_num
+            idx_bw = domain_label==domain_i;
+            domain_size = sum(idx_bw(:));
+%             idx_bw_sumrow = sum(idx_bw,2);
+%             idx_bw_sumcol = sum(idx_bw,1);
+            if domain_size < 1000
+                continue;
+            end
+            negative_base = zeros(size(img_crop)) - 1;
+            negative_base(idx_bw) = img_crop(idx_bw);
+            [img_temp,m_temp,n_temp] = ...
+                search_points(negative_base,'bidirect advance 2');
+%             figure
+%             subplot(1,2,1),imshow(img_temp,[]);
+%             subplot(1,2,2),imshow(negative_base,[]);
+            m = [m;m_temp];
+            n = [n;n_temp];
+            img = img + img_temp;
+        end
+end
+end
+
+function [m,n] = cloudpoints_imgidx_default...
     (img_name,mask,h1_s,h2_s)
 % input arg
 %   img_name: img_address (read image for disk in each loop)

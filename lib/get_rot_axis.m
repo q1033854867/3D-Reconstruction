@@ -5,9 +5,9 @@ rot_axis.img_idx = [m,n];
 
 if nargin == 4
     board = imread(board_path);
-    [x,y] = real_position([m,n],nodes,board);
+    [x,y] = cloudpoints_boardidx([m,n],nodes,board);
 else
-    [x,y] = real_position([m,n],nodes);
+    [x,y] = cloudpoints_boardidx([m,n],nodes);
 end
 
 rot_axis.real_idx = [x,y];

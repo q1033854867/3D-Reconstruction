@@ -1,4 +1,4 @@
-function [x,y] = real_position(points,nodes,board)
+function [x,y] = cloudpoints_boardidx(points,nodes,board)
 % transform image coord system into checkerboard coor system
 % input arg
 %   points: laserline points
@@ -9,12 +9,12 @@ function [x,y] = real_position(points,nodes,board)
 
 %% choose mode
 if nargin == 1
-    [x,y] = real_position_accelerate(points);
+    [x,y] = cloudpoints_boardidx_accelerate(points);
 elseif nargin == 2
-    [x,y] = real_position_default(points,nodes);
+    [x,y] = cloudpoints_boardidx_default(points,nodes);
 else
     % can show result in checkerboard image
-    [x,y] = real_position_default(points,nodes,board);
+    [x,y] = cloudpoints_boardidx_default(points,nodes,board);
 end
 
 end
@@ -27,12 +27,11 @@ function [result] = rot_angle(input,base)
 % output arg
 %   result: rotate result
 
-%%
 input(input<0) = 2*pi + input(input<0);
 result = mod(input - base,2*pi);
 end
 
-function [x,y] = real_position_accelerate(points)
+function [x,y] = cloudpoints_boardidx_accelerate(points)
 % input arg
 %   points: laserline points
 % output arg
@@ -134,7 +133,7 @@ y = real_idx(:,2);
 
 end
 
-function [x,y] = real_position_default(points,nodes,board)
+function [x,y] = cloudpoints_boardidx_default(points,nodes,board)
 % input arg
 %   points: laserline points
 %   nodes: checkerboard nodes struct

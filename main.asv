@@ -11,19 +11,19 @@ global config
 % format(each row): [x_idx y_idx z_idx]
 config.write_into_txt = false;
 % realtime display 3d cloudpoints result
-config.realtime_disp = false;
+config.realtime_disp = true;
 % read all images into memory previous
-config.read_img_prev = true;
+config.read_img_prev = false;
 % dynamic adjust size of ROI mask (can speed up)
-config.mask_dynamc_adj = true;
+config.mask_dynamc_adj = false;
 % timing
 config.timing = true;
 % about image name
 config.imgfold = fullfile(pwd,'demodata');
 config.imgstr = 'A';
-config.imgnum = 0:499;
+config.imgnum = 17:499;
 % whether laser extract result
-config.save_laser = false;
+config.save_laser = true;
 config.laser_fold = fullfile(pwd,'result_laser');
 config.count = 0;
 
@@ -125,7 +125,7 @@ for img_i = 1:length(config.imgnum)
     % final coordinate of cloudpoints in space rectangular coordinate 
     % system.
     theta = theta_delta*img_i;
-    [x,y,z] = cloudpoints_3d_coord([x_ck,y_ck],theta,rot_axis);
+    [x,y,z] = real_3d_coord([x_ck,y_ck],theta,rot_axis);
     
     % realtime_disp
     if config.realtime_disp == true

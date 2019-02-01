@@ -8,8 +8,7 @@ board = board.^2;
 % imhist(board);pause
 
 board = double(im2bw(board,0.4));
-% figure,imshow(board)
-% pause
+% figure,imshow(board);pause
 
 % corr base
 base_size = 60;
@@ -24,9 +23,6 @@ cor_min = min(img_nodes(:));
 cor_max = max(img_nodes(:));
 img_nodes(img_nodes<th*cor_max & img_nodes>th*cor_min) = 0;
 img_nodes(img_nodes~=0) = 1;
-% corr result
-% figure,imshow(points,[])
-% pause
 
 single_points = img_nodes*0;
 L = bwlabel(img_nodes);
@@ -66,9 +62,5 @@ for i = 1:size(nodes_raw,1)
 end
 title('checkerboard nodes')
 pause(0.1)
-
-% if ~exist(fullfile(pwd,'nodes.mat'))
-%     save('nodes.mat','nodes')
-% end
 
 end
