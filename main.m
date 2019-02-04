@@ -30,7 +30,8 @@ config.imgnum = 0:499;
 config.laser_fold = fullfile(pwd,'result_laser');
 % count
 config.count = 0;
-disp('your config as follow')
+disp('configuration is as follows:')
+disp(config)
 
 %% other global var
 global nodes mask filter_s 
