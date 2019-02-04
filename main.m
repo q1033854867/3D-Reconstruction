@@ -1,7 +1,7 @@
 function main(varargin)
 % Before run this function, you should check four .mat file:
 %   nodes.mat mask.mat rot_axis.mat and filter_s.mat 
-% whether exist in current current directory.
+% whether exist in current directory.
 % If not,you should run 'preprocess' in command line first.  
 clear global
 
@@ -11,21 +11,26 @@ global config
 % format(each row): [x_idx y_idx z_idx]
 config.write_into_txt = false;
 % realtime display 3d cloudpoints result
-config.realtime_disp = false;
+config.realtime_disp = true;
 % read all images into memory previous
 config.read_img_prev = true;
 % dynamic adjust size of ROI mask (can speed up)
 config.mask_dynamc_adj = true;
+% choose laserline extraction algorithm
+config.laser_algorithm = 'basic';
+% whether laser extract result
+config.save_laser = false;
 % timing
 config.timing = true;
 % about image name
 config.imgfold = fullfile(pwd,'demodata');
 config.imgstr = 'A';
 config.imgnum = 0:499;
-% whether laser extract result
-config.save_laser = false;
+% save laser extract result in following fold
 config.laser_fold = fullfile(pwd,'result_laser');
+% count
 config.count = 0;
+disp('your config as follow')
 
 %% other global var
 global nodes mask filter_s 
@@ -59,24 +64,40 @@ end
 if config.read_img_prev == true
     % estimate memory for feasibility
     mem_img = numel(board)/size(board,3);
-    meminfo = memory;
-    mem_avi = meminfo.MemAvailableAllArrays;
     mem_need = length(config.imgnum) * mem_img;
     disp(['All images will take up ',num2str(mem_need/2^30),...
         'GBytes of memory space']);
-    if mem_need + 2^30 > mem_avi
-        error([...
-            'Avilable memory is not enough to read all images in.',...
-            ' Please change the option ''config.readallimgprev'' ',...
-            'to ''false''']);
+    if ispc
+        meminfo = memory;
+        mem_avi = meminfo.MemAvailableAllArrays;
+        if mem_need + 2^30 > mem_avi
+            error([...
+                'Avilable memory is not enough to read all images in.',...
+                ' Please change the option ''config.readallimgprev'' ',...
+                'to ''false''']);
+        end
+        % init global big images mat
+        global_img_mat('init',size(board,1),size(board,2),...
+            length(config.imgnum),'uint8');
+    else
+        try
+            % init global big images mat
+            global_img_mat('init',size(board,1),size(board,2),...
+                length(config.imgnum),'uint8');
+        catch
+            error([...
+                'Avilable memory is not enough to read all images in.',...
+                ' Please change the option ''config.readallimgprev'' ',...
+                'to ''false''']);
+        end
     end
-    % init global big images mat
-    global_img_mat('init',size(board,1),size(board,2),...
-        length(config.imgnum),'uint8');
     disp('start reading images...')
     start_readimg_time = clock;
     % write into global big images mat
     for img_i = 1:length(config.imgnum)
+        if mod(img_i,50) == 0
+            disp([num2str(img_i/length(config.imgnum)*100),'%'])
+        end
         img_name = fullfile(config.imgfold,[config.imgstr,...
             num2str(config.imgnum(img_i)),'.jpg']);
         global_img_mat('set',img_i,img_name);
@@ -97,12 +118,7 @@ end
 
 %% main loop
 disp('start processing...')
-for img_i = 1:length(config.imgnum)
-    % count
-    if mod(img_i,50) == 0
-        disp(num2str(img_i))
-    end
-    
+for img_i = 1:length(config.imgnum)    
     % whether read_img_prev
     if config.read_img_prev == true
         img_name = img_i;
@@ -141,7 +157,11 @@ for img_i = 1:length(config.imgnum)
             fprintf(fp,'%f %f %f\r\n',file_temp(file_i,:));
         end
     end
-
+    
+    % count and display
+    if mod(img_i,50) == 0
+        disp([num2str(img_i/length(config.imgnum)*100),'%'])
+    end
     config.count = config.count + 1;
 end
 

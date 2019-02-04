@@ -2,33 +2,33 @@
 This is a MATLAB project of 3D-Reconstruction. By first running the prepross.m and then main.m, you can get the cloudpoints of demodata. Based on cloudpoints, you can reconstruct the object using other tools such as [MeshLab](http://www.meshlab.net/).
 
 ## Components
-- demodata
-  * A0...499.jpg
-- lib
-- lib_c
-- lib_aux
+- demodata/
+- lib/
+- lib_c/
 - prepeocess.m
 - main.m
+- main_compile.m
 - rot_axis.jpg
 - board.jpg
 
-Total 500 demodata are in the `demodata`. And the measured object is an iron column. <br>
-Files in `lib` and `lib_aux` are .m source file. Files in `lib_c` are c source file and its binary file which compiled in Windows 10. <br>
 Two images `rot_axis.jpg` and `board.jpg` are axis of rotation and checherboard, respectively.<br>
-`prepeocess.m` do some preprocessing. When you run it and get four important .mat file in root folder, you will be able to run `main.m` and get cloudpoints result finally. <br>
-Note! The variable `config` in `main.m` control processing mode. Part of its default values are as follows:
+Files in `lib/` are MATLAB source file. Files in `lib_c/` are C source file and its binary file which compiled in Windows 10. <br>
+The function `prepeocess` do some preprocessing, such as find nodes of checkerboard, organize nodes into graph, generate mask of ROI automaticlly, get index of rotation axis in image, etc. After you run it and get four important .mat file in top directory, you will be able to run `main` and get cloudpoints result finally. <br>
+Note! The global variable `config` in `main.m` controls processing mode. Parts of its default values are as follows:
 ```matlab
 config.write_into_txt = false;
 config.realtime_disp = true;
 config.read_img_prev = true;
 config.mask_dynamc_adj = true;
+config.laser_algorithm = 'basic';
+config.save_laser = false;
 ```
-The first two lines mean we do not write cloudpoints into .txt file but realtime display the result. The third lines means we read all demo images into memory before processing loop. We do this because the MATLAB function `imread` is a little slow. The last lines means the mask of ROIs will dynamic adjust its size, but which is not yet perfect.
+The first two lines mean we do not write cloudpoints into .txt file but realtime display the 3D cloudpoints. The third line means we read all images into memory before processing, which may take up 3.7634GBytes of memory space. We do this because the MATLAB function `imread()` is a little slow. If your memory is not enough, please set this item to false. The fourth line means the mask of ROIs will dynamic adjust its size, but the adjust algorithm is naive, which will be enhanced in future. The fifth line means we default use basic extraction algorithm to get the centerline of linear structured laser. Also, there are other alternative algorithms you can choose, see details in `lib/cloudpoints_imgidx.m`. 
 
 ## Platform
 Tested under Windows 10 and MATLAB R2018b.
 
-You also can conveniently run this project in macOS or Linux. But before you run anything, you should compile all the c source file using `mex filename`. More details in [MATLAB mex documentation](https://ww2.mathworks.cn/help/matlab/ref/mex.html?lang=en)
+You also can conveniently run this project in macOS or Linux. But before you run anything, you should compile all the C source file using `mex filename`. More details in [MATLAB mex documentation](https://ww2.mathworks.cn/help/matlab/ref/mex.html?lang=en)
 
 In addition, we also have another Python version for Raspberry Pi, which aiming at realtime processing and are now in developing.
 

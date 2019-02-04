@@ -55,8 +55,7 @@ img_crop = img_crop_f(filter_s.h_center_idx(1):...
 
 %% search points based on barycenter method
 if config.save_laser == true
-    [tempimg,m,n] = choose_algorithm(img_crop,'bidirect advance 2');
-    % [tempimg,m,n] = choose_algorithm(img_crop,'bidirect advance 2');
+    [tempimg,m,n] = choose_algorithm(img_crop,config.laser_algorithm);
     name_laser = fullfile(config.laser_fold,[num2str(config.count),...
         '_laser.jpg']);
     name_inten = fullfile(config.laser_fold,[num2str(config.count),...
@@ -64,7 +63,7 @@ if config.save_laser == true
     imwrite(tempimg,name_laser);
     imwrite(img_crop,name_inten);
 else
-    [~,m,n] = choose_algorithm(img_crop,'basic');
+    [~,m,n] = choose_algorithm(img_crop,config.laser_algorithm);
 end
 
 % coord transform
@@ -73,7 +72,7 @@ n = n + mask.c_min;
 
 %% adjust size of ROI mask
 if mask.dy_adj
-    mask.r_min = round(min(m)) - 20;
+    mask.r_min = round(min(m));
     mask.mask_crop = ...
         mask.main_mask(mask.r_min:mask.r_max,mask.c_min:mask.c_max);
     mask.dy_adj = false;
@@ -107,8 +106,8 @@ switch algorithm
         for domain_i = 1:domain_num
             idx_bw = domain_label==domain_i;
             domain_size = sum(idx_bw(:));
-%             idx_bw_sumrow = sum(idx_bw,2);
-%             idx_bw_sumcol = sum(idx_bw,1);
+            % idx_bw_sumrow = sum(idx_bw,2);
+            % idx_bw_sumcol = sum(idx_bw,1);
             if domain_size < 1000
                 continue;
             end
@@ -116,9 +115,9 @@ switch algorithm
             negative_base(idx_bw) = img_crop(idx_bw);
             [img_temp,m_temp,n_temp] = ...
                 search_points(negative_base,'bidirect advance 2');
-%             figure
-%             subplot(1,2,1),imshow(img_temp,[]);
-%             subplot(1,2,2),imshow(negative_base,[]);
+            % figure
+            % subplot(1,2,1),imshow(img_temp,[]);
+            % subplot(1,2,2),imshow(negative_base,[]);
             m = [m;m_temp];
             n = [n;n_temp];
             img = img + img_temp;

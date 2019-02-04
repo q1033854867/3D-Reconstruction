@@ -1,12 +1,12 @@
 function preprocess(varargin)
-% If you want to do default preprocessing, you don not need to 
+% If you want to do default preprocessing, you do not need to 
 % input any argument.
 % If you want to do some specific preprocessing, you can use 
 % preprocess(_,Name,Value) to specifies preprocessing properties 
 % using one or more Name,Value pair arguments.
 % Properties include 'board_path', 'rot_axis_path', 'filter_s'.
 % For instance, you can use preprocess('filter_s',[1,1],[2,2])
-% to specific a self-defined filter_s struct.
+% to specific a self-defined filter_s.
 
 if nargin == 0
     % file path

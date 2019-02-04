@@ -6,7 +6,7 @@ function [m,n] = rotation_axis(img_addr,mask,varargin)
 % output arg
 %   m(n): coord in image coodinate system. 
 
-%% choose mode
+% choose mode
 if nargin == 2
     % extract centerline method
     [m,n] = cloudpoints_imgidx(img_addr,mask);
