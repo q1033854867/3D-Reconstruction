@@ -2,7 +2,7 @@
 This is a MATLAB project of 3D-Reconstruction. By first running the `prepross.m` and then `main.m`, you can get the cloudpoints of demodata. Based on cloudpoints, you can reconstruct the object using other tools, such as [Geomagic Studio](https://www.3dsystems.com/) or [MeshLab](http://www.meshlab.net/).
 
 ## Usage
-First, add the project fold with its subfold into your MATLAB search path<br>
+First, add the project fold with its subfold into your MATLAB search path.<br>
 Then, in MATLAB command line, run:
 ```MATLAB
 preprocess
@@ -13,8 +13,6 @@ If you need to recompile C source file:
 cd lib_c
 mex search_points.c
 cd ..
-preprocess
-main
 ```
 
 ## Components
