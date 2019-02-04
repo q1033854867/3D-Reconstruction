@@ -1,13 +1,28 @@
 # 3D-Reconstruction
 This is a MATLAB project of 3D-Reconstruction. By first running the `prepross.m` and then `main.m`, you can get the cloudpoints of demodata. Based on cloudpoints, you can reconstruct the object using other tools, such as [Geomagic Studio](https://www.3dsystems.com/) or [MeshLab](http://www.meshlab.net/).
 
+## Usage
+First, add the project fold with its subfold into your MATLAB search path<br>
+Then, in MATLAB command line, run:
+```MATLAB
+preprocess
+main
+```
+If you need to recompile C source file: 
+```MATLAB
+cd lib_c
+mex search_points.c
+cd ..
+preprocess
+main
+```
+
 ## Components
 - demodata/
 - lib/
 - lib_c/
 - prepeocess.m
 - main.m
-- main_compile.m
 - rot_axis.jpg
 - board.jpg
 
@@ -15,7 +30,7 @@ Two images `rot_axis.jpg` and `board.jpg` are axis of rotation and checherboard,
 Files in `lib/` are MATLAB source file. Files in `lib_c/` are C source file and its binary file which compiled in Windows 10. <br>
 The function `preprocess.m` do some preprocessing, such as find nodes of checkerboard, organize nodes into graph, generate mask of ROI automaticlly, get index of rotation axis in image, etc. After you run it and get four important .mat file in top directory, you will be able to run `main.m` and get cloudpoints result finally. <br>
 Note! The global variable `config` in `main.m` controls processing mode. Parts of its default values are as follows:
-```matlab
+```MATLAB
 config.write_into_txt = false;
 config.realtime_disp = true;
 config.read_img_prev = true;
